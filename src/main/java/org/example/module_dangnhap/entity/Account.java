@@ -22,6 +22,11 @@ public class Account  {
     @Column(nullable = false,unique = true)
      String password;
     @ManyToMany
+    @JoinTable(
+            name = "account_role",
+            joinColumns = @JoinColumn(name = "account_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     Set<Role> roles;
 
     @Column(columnDefinition = "boolean default true")
