@@ -1,57 +1,80 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.5'
-	id 'io.spring.dependency-management' version '1.1.6'
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
 }
 
 group = 'org.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-web-services'
-	implementation 'org.modelmapper:modelmapper:2.1.1'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+    // JPA starter for interacting with databases using Spring Data JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-	// Các dependencies liên quan đến bảo mật, nếu bạn cần
-	// implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Web starter for building web applications with RESTful services
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	// JSON Web Token
-	// implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
-	// runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
-	// runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    // Web services starter for working with SOAP web services
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'
 
-	// Dependencies cho JUnit và Mockito
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-	implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-	testImplementation 'org.mockito:mockito-core:4.0.0'
-	implementation 'org.mockito:mockito-core:4.0.0'
+    // ModelMapper for object mapping, useful for mapping entities to DTOs
+    implementation 'org.modelmapper:modelmapper:2.1.1'
 
-	testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
-	implementation 'org.mockito:mockito-junit-jupiter:4.0.0'
+    // Spring Security starter for authentication and authorization
+    // implementation 'org.springframework.boot:spring-boot-starter-security'
 
+    // Validation starter for bean validation, validating inputs in the application
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-// Spring Boot Starter Test để hỗ trợ kiểm thử tích hợp
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // Lombok, a library to reduce boilerplate code, such as getters and setters
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Developer tools for live reloading during development
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // MySQL connector for database connectivity
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Starter for testing with JUnit and Mockito
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // Security test utilities for testing Spring Security
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // JUnit platform launcher for running JUnit tests
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // JSON Web Token (JWT) dependencies for handling JWT authentication
+    // Uncomment the lines below if you need to use JWTs in your application
+    // implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+    // runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    // runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+
+    // JUnit and Mockito dependencies for unit testing
+    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    implementation 'org.mockito:mockito-core:4.0.0'
+    testImplementation 'org.mockito:mockito-core:4.0.0'
+    implementation 'org.mockito:mockito-junit-jupiter:4.0.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
 
 
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 test {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
