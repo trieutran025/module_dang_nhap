@@ -14,19 +14,17 @@ import java.util.Optional;
 
 @Repository
 public interface IAccountRepository extends JpaRepository<Account, Long> {
-
     @Procedure(procedureName = "create_employee_account")
     Integer createEmployeeAccount(
             @Param("p_username") String username,
             @Param("p_password") String password,
-            @Param("p_employee_id") Long employeeId);
+            @Param("p_id") Long employeeId);
 
-    @Query(value = "SELECT id, username, password, is_active FROM account WHERE username = :username", nativeQuery = true)
+    @Query(value = "SELECT account_id, username, password, is_active FROM account WHERE username = :username", nativeQuery = true)
     Optional<Account> findByUsername(String username);
 
 
     @Modifying
     @Query(value = "UPDATE Account SET password = :newPassword WHERE username = :username", nativeQuery = true)
     int updatePasswordByUsername(@Param("username") String username, @Param("newPassword") String newPassword);
-
 }

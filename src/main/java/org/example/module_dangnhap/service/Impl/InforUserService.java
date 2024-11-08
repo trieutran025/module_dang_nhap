@@ -7,6 +7,7 @@ import org.example.module_dangnhap.service.Iteface.InforUserRepoService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public class InforUserService implements InforUserRepoService {
     InforUserRepo inforUserRepo;
     @Autowired
     ModelMapper modelMapper;
+
+    public InforUserService(InforUserRepo userRepository, PasswordEncoder passwordEncoder) {
+    }
 
     @Override
     public List<InforUserDto> findAll() {

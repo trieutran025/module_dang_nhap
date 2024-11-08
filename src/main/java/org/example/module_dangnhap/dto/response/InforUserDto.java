@@ -2,6 +2,7 @@ package org.example.module_dangnhap.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.module_dangnhap.dto.request.AccountReqDTO;
 
 @Data
 @NoArgsConstructor
@@ -15,4 +16,6 @@ public class InforUserDto {
      String name;
      String email;
      String phone;
+     String address;
+     Long accountId;
 }

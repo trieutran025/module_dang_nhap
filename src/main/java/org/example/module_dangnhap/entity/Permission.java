@@ -1,23 +1,24 @@
 package org.example.module_dangnhap.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Getter
 @Setter
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Role {
+public class Permission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long roleId;
-    String roleName;
-    @ManyToMany
-    Set<Permission> permissions;
+    Long id;
+
+    String name;
+    String description;
 }
