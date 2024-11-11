@@ -21,8 +21,4 @@ public class CorsConfig {
             }
         };
     }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }
