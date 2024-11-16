@@ -14,6 +14,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthenticationResponse {
+
     @JsonProperty("access_token")
     String accessToken;
 
@@ -29,7 +30,7 @@ public class AuthenticationResponse {
     @JsonProperty("roles")
     List<String> roles;
 
-    // Thêm setter và getter cho `authenticated` nếu chưa có
+    // Setter và getter cho `authenticated` nếu chưa có
     public boolean isAuthenticated() {
         return isAuthenticated;
     }

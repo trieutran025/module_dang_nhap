@@ -7,8 +7,10 @@ import org.example.module_dangnhap.dto.response.ChangePasswordResponse;
 import org.example.module_dangnhap.entity.Account;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+
+
 public interface IAccountService extends UserDetailsService {
-    String createEmployeeAccount(Long employeeId, AccountReqDTO accountReqDTO);
+     String createAccountAndCustomerInfo(AccountReqDTO accountReqDTO);
 
 
     Account getCurrentAccount();

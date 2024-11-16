@@ -18,6 +18,11 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long roleId;
     String roleName;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "role_permission",  // Tên bảng nối
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
     Set<Permission> permissions;
 }

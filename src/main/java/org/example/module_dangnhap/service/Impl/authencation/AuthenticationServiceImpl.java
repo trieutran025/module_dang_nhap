@@ -21,10 +21,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,27 +42,47 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     AuthenticationManager authenticationManager;
 
     /*====================================== AUTHENTICATION METHODS ======================================*/
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) throws AccountNotFoundException {
         try {
             Account user = iAccountRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new AccountNotFoundException("Tài khoản KHÔNG tồn tại."));
-
-            // Authenticate user credentials
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    )
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            // Generate access and refresh tokens
+            // Log để kiểm tra thông tin user
+            System.out.println("User found: " + user.getUsername());
+
+            List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                    .flatMap(role -> Stream.concat(
+                            Stream.of(new SimpleGrantedAuthority("ROLE_" + role.getRoleName())),
+                            role.getPermissions().stream().map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                    ))
+                    .collect(Collectors.toList());
+
+            // Log để kiểm tra thông tin authorities
+            System.out.println("Authorities: " + authorities);
+
             String accessToken = jwtServiceImpl.generateAccessToken(user);
             String refreshToken = jwtServiceImpl.generateRefreshToken(user);
-            List<String> roles = user.getRoles().stream().map(Role::getRoleName).toList();
 
-            // Revoke old tokens and save new tokens
             revokeAllTokenByUser(user);
             saveUserToken(accessToken, refreshToken, user);
+
+            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+
+            // Log thông tin user và authorities trong SecurityContextHolder
+            System.out.println("Authorities in SecurityContextHolder: " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
+
+            List<String> roles = authorities.stream()
+                    .map(SimpleGrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+
+            // Log thông tin roles
+            System.out.println("User: " + user.getUsername() + " - Authorities: " + roles);
 
             return AuthenticationResponse.builder()
                     .accessToken(accessToken)
@@ -67,10 +91,11 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
                     .roles(roles)
                     .message("Đăng nhập thành công.")
                     .build();
+
         } catch (BadCredentialsException e) {
             throw new InvalidPasswordException("Mật khẩu KHÔNG trùng khớp.");
         } catch (AccountNotFoundException e) {
-            throw new RuntimeException("Tài khoản không tồn tại");
+            throw e;
         }
     }
 

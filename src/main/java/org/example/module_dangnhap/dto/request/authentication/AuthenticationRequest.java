@@ -2,6 +2,9 @@ package org.example.module_dangnhap.dto.request.authentication;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.module_dangnhap.entity.Role;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor

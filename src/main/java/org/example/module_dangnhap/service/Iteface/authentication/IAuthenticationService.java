@@ -7,8 +7,10 @@ import org.example.module_dangnhap.dto.request.authentication.AuthenticationRequ
 import org.example.module_dangnhap.repo.authentication.AuthenticationResponse;
 import org.springframework.http.ResponseEntity;
 
+import javax.security.auth.login.AccountNotFoundException;
+
 public interface IAuthenticationService {
-    AuthenticationResponse authenticate(AuthenticationRequest request);
+    AuthenticationResponse authenticate(AuthenticationRequest request) throws AccountNotFoundException;
     ResponseEntity refreshToken(HttpServletRequest request, HttpServletResponse response);
 
 }

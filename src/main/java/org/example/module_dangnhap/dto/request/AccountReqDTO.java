@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.processing.Pattern;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -20,4 +22,6 @@ public class AccountReqDTO {
 //    @Size(max = 30, message = "Password must not exceed 30 characters")
 //    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Password must contain only letters and numbers")
     String password; // Mật khẩu nên được mã hóa trước khi lưu
+    private Long employeeId;
+     List<String> roleName;
 }

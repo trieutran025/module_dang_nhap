@@ -15,9 +15,14 @@ import java.util.Optional;
 @Repository
 public interface InforUserRepo extends JpaRepository<InforUser, Long> {
 
-                @Query(value =
-                        "SELECT id,name, email, phone,address,account_id FROM infor_user",nativeQuery = true)
-        List<InforUser> findAllInforUser();
+        @Query(value = "SELECT u.id, u.name, u.email, u.phone, u.address, u.account_id " +
+                "FROM infor_user u " +
+                "JOIN account a ON u.account_id = a.account_id " +
+                "JOIN account_role ar ON a.account_id = ar.account_id " +
+                "JOIN role r ON ar.role_id = r.role_id " +
+                "WHERE r.role_name IN ('MANAGER', 'RECEPTIONIST') " +
+                "AND u.account_id != :currentAccountId", nativeQuery = true)
+        List<InforUser> findAllEmployee(@Param("currentAccountId") Long currentAccountId);
 
         @Transactional
         @Modifying

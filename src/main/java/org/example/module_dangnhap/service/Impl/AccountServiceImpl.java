@@ -10,8 +10,10 @@ import org.example.module_dangnhap.dto.request.ChangePasswordRequest;
 import org.example.module_dangnhap.dto.response.ChangePasswordResponse;
 import org.example.module_dangnhap.entity.Account;
 import org.example.module_dangnhap.entity.InforUser;
+import org.example.module_dangnhap.entity.Role;
 import org.example.module_dangnhap.repo.IAccountRepository;
 import org.example.module_dangnhap.repo.InforUserRepo;
+import org.example.module_dangnhap.repo.RoleRepository;
 import org.example.module_dangnhap.service.Iteface.IAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,8 +27,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,28 +44,21 @@ public class AccountServiceImpl implements IAccountService {
     private PasswordEncoder passwordEncoder;
 
     InforUserRepo inforUserRepo;
+    RoleRepository roleRepository;
 
-    @Override
+
     @Transactional
-    @PreAuthorize("hasAuthority('ADMIN')")
-    public String createEmployeeAccount(Long employeeId, AccountReqDTO accountReqDTO) {
+    public String createAccountAndCustomerInfo(AccountReqDTO accountReqDTO) {
         // Step_1: Check if account exists
         Optional<Account> existingAccount = iAccountRepository.findByUsername(accountReqDTO.getUsername());
         if (existingAccount.isPresent()) {
             return "Account with username: " + accountReqDTO.getUsername() + " already exists";
         }
-
-        // Step_2: Check if employeeId exists
-        Optional<InforUser> employee = inforUserRepo.findInforUserById(employeeId);
-        if (employee == null) {
-            return "Employee with ID: " + employeeId + " does not exist";
-        }
-
         // Step_3: Encrypt password
         String encryptedPassword = passwordEncoder.encode(accountReqDTO.getPassword());
-
         // Step_4: Create account
-        int status = iAccountRepository.createEmployeeAccount(accountReqDTO.getUsername(), encryptedPassword, employeeId);
+        int status = iAccountRepository.createAccount(accountReqDTO.getUsername(), encryptedPassword);
+        iAccountRepository.linkAccountToInforUser();
         if (status == 1) {
             return "Employee account created successfully";
         } else {
@@ -67,15 +66,19 @@ public class AccountServiceImpl implements IAccountService {
         }
     }
 
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Account account = iAccountRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         // Access roles to initialize them within the transaction
+
         account.getRoles().size();
         return account;
     }
+
+
 
     @Override
     public Account getCurrentAccount() {

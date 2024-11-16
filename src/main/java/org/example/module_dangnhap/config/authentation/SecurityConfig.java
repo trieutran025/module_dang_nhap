@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,39 +42,60 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
     CustomLogoutHandler logoutHandler;
-    String[] publicEndPoints = {
-            "/login/**", "/refresh_token/**", "/register/**", "/home/**"
-    };
+    private static final String[] PUBLIC_ENDPOINTS = {"/login/**", "/home/**", "/customer/register","/change-password"};
+    private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employee/**",};
+    private static final String[] MANAGER_ENDPOINTS = {"/api/manager/update/**","/api/receptionist/**"};
+    private static final String[] RECEPTIONIST_ENDPOINTS = {"/api/receptionist/update/**"};
+    private static final String[] CUSTOMER_ENDPOINTS = {"/api/aaa/**"};
 
 
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(
-                        req -> req.requestMatchers(publicEndPoints)
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated()
-                )
-                .userDetailsService(userDetailsService)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN")
+                        .requestMatchers(MANAGER_ENDPOINTS).hasRole("MANAGER")
+                        .requestMatchers(RECEPTIONIST_ENDPOINTS).hasRole("RECEPTIONIST")
+                        .requestMatchers(CUSTOMER_ENDPOINTS).hasRole("CUSTOMER")
+                        .anyRequest().authenticated()
+
+                ).userDetailsService(userDetailsService)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(
-                        e -> e.accessDeniedHandler(
-                                ((request, response, accessDeniedException) -> response.setStatus(403))
-                        )
-                                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .exceptionHandling(e -> e
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                            System.out.println("Current Authorities: " + authentication.getAuthorities());
+                            response.setStatus(HttpStatus.FORBIDDEN.value());
+                            System.out.println("Access Denied: " + accessDeniedException.getMessage());
+                            System.out.println("User: " + authentication.getName() + " - Roles: " + authentication.getAuthorities());
+                            try {
+                                if (!authentication.getAuthorities().isEmpty()) {
+                                    System.out.println("Authorities are present.");
+                                } else {
+                                    System.out.println("No authorities found. Please check role mapping in buildScope.");
+                                }
+                            } catch (Exception r) {
+                                System.out.println("Error: " + r.getMessage());
+                            }
+
+                        })
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .addLogoutHandler((request, response, authentication)
-                                -> SecurityContextHolder.clearContext()
-                        ))
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+                )
                 .build();
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
         return configuration.getAuthenticationManager();
