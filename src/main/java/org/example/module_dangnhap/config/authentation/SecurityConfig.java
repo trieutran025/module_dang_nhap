@@ -29,7 +29,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
+
+import org.example.module_dangnhap.config.authentation.CorsConfig;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -43,6 +45,9 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
     CustomLogoutHandler logoutHandler;
+    @Resource
+    CorsConfigurationSource corsConfigurationSource;
+
     private static final String[] PUBLIC_ENDPOINTS = {"/login/**", "/home/**", "/customer/register","/change-password"};
     private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employees",};
     private static final String[] MANAGER_ENDPOINTS = {"/api/manager/update/**","/api/receptionist/**"};
@@ -57,6 +62,7 @@ public class SecurityConfig {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cros->cros.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN")
