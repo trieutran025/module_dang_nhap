@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 @Configuration
 @EnableWebSecurity
@@ -43,7 +44,7 @@ public class SecurityConfig {
 
     CustomLogoutHandler logoutHandler;
     private static final String[] PUBLIC_ENDPOINTS = {"/login/**", "/home/**", "/customer/register","/change-password"};
-    private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employee/**",};
+    private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employees",};
     private static final String[] MANAGER_ENDPOINTS = {"/api/manager/update/**","/api/receptionist/**"};
     private static final String[] RECEPTIONIST_ENDPOINTS = {"/api/receptionist/update/**"};
     private static final String[] CUSTOMER_ENDPOINTS = {"/api/aaa/**"};
@@ -95,6 +96,7 @@ public class SecurityConfig {
                 )
                 .build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
