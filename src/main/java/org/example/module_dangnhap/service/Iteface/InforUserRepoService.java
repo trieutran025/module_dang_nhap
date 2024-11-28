@@ -8,7 +8,7 @@ import java.util.List;
 public interface InforUserRepoService {
     List<InforUserDto> findAll();
     void delete(Long id);
-    void add(String name, String email, String phone);
+    void add(String name, String email, String phone,String address);
 
     void update(Long id, String name, String email, String phone);
 }

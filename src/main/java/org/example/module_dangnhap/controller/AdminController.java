@@ -28,7 +28,7 @@ public class AdminController {
 
     @PostMapping("")
     public ResponseEntity<Void> addInforUser(@RequestBody InforUserDto userDto) {
-        inforUserRepoService.add(userDto.getName(), userDto.getEmail(), userDto.getPhone());
+        inforUserRepoService.add(userDto.getName(), userDto.getEmail(), userDto.getPhone(), userDto.getAddress());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

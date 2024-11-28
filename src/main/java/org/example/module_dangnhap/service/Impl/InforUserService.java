@@ -43,7 +43,12 @@ public class InforUserService implements InforUserRepoService {
 
         // Ánh xạ danh sách InforUser thành InforUserDto
         return inforUsers.stream()
-                .map(inforUser -> modelMapper.map(inforUser, InforUserDto.class))
+                .map(inforUser -> {
+                    InforUserDto inforUserDto = modelMapper.map(inforUser, InforUserDto.class);
+                    // Thêm thông tin role_name vào trong DTO nếu cần
+                    inforUserDto.setRoleName(inforUser.getAccount().getRoles());
+                    return inforUserDto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -55,8 +60,8 @@ public class InforUserService implements InforUserRepoService {
 
 
     @Override
-    public void add(String name, String email, String phone) {
-        inforUserRepo.addNative(name, email, phone);
+    public void add(String name, String email, String phone,String address) {
+        inforUserRepo.addNative(name, email, phone,address);
     }
 
     @Override

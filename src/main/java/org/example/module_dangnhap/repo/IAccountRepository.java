@@ -24,7 +24,7 @@ public interface IAccountRepository extends JpaRepository<Account, Long> {
     @Transactional
     @Query(value = "INSERT INTO infor_user (account_id) " +
             "VALUES (LAST_INSERT_ID())", nativeQuery = true)
-    void linkAccountToInforUser();
+    Integer linkAccountToInforUser();
 
 
 

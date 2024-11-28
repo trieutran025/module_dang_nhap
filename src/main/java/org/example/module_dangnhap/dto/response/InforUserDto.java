@@ -3,6 +3,9 @@ package org.example.module_dangnhap.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.example.module_dangnhap.dto.request.AccountReqDTO;
+import org.example.module_dangnhap.entity.Role;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -18,4 +21,5 @@ public class InforUserDto {
      String phone;
      String address;
      Long accountId;
+     Set<Role> roleName;
 }

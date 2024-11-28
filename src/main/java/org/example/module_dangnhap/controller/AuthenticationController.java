@@ -57,6 +57,12 @@ public class AuthenticationController {
                             .build());
         }
     }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        // Không cần xử lý gì trên server nếu chỉ sử dụng JWT
+        // Tuy nhiên, bạn có thể xóa session hoặc hủy token nếu sử dụng các kỹ thuật khác
+        return ResponseEntity.ok("Đăng xuất thành công");
+    }
 
     @PostMapping("/refresh_token")
     public ResponseEntity<?> refreshToken(
