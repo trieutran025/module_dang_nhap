@@ -34,8 +34,8 @@ public interface InforUserRepo extends JpaRepository<InforUser, Long> {
 
         @Transactional
         @Modifying // Đánh dấu đây là một thao tác thay đổi
-        @Query(value = "INSERT INTO infor_user (name, email, phone) VALUES (:name, :email, :phone)", nativeQuery = true)
-        void addNative(@Param("name") String name, @Param("email") String email, @Param("phone") String phone);
+        @Query(value = "INSERT INTO infor_user (name, email, phone,address) VALUES (:name, :email, :phone,:address)", nativeQuery = true)
+        Integer addNative(@Param("name") String name, @Param("email") String email, @Param("phone") String phone,@Param("address")String address);
 
 
         @Transactional

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.module_dangnhap.dto.request.AccountReqDTO;
 import org.example.module_dangnhap.dto.request.ChangePasswordRequest;
 import org.example.module_dangnhap.dto.response.ChangePasswordResponse;
+import org.example.module_dangnhap.dto.response.InforUserDto;
 import org.example.module_dangnhap.entity.Account;
 import org.example.module_dangnhap.entity.InforUser;
 import org.example.module_dangnhap.entity.Role;
@@ -48,23 +49,49 @@ public class AccountServiceImpl implements IAccountService {
 
 
     @Transactional
-    public String createAccountAndCustomerInfo(AccountReqDTO accountReqDTO) {
-        // Step_1: Check if account exists
-        Optional<Account> existingAccount = iAccountRepository.findByUsername(accountReqDTO.getUsername());
-        if (existingAccount.isPresent()) {
-            return "Account with username: " + accountReqDTO.getUsername() + " already exists";
-        }
-        // Step_3: Encrypt password
-        String encryptedPassword = passwordEncoder.encode(accountReqDTO.getPassword());
-        // Step_4: Create account
-        int status = iAccountRepository.createAccount(accountReqDTO.getUsername(), encryptedPassword);
-        iAccountRepository.linkAccountToInforUser();
-        if (status == 1) {
-            return "Employee account created successfully";
-        } else {
-            return "Employee account created failed";
+    public String createAccountAndCustomerInfo(AccountReqDTO accountReqDTO, InforUserDto inforUserDto) {
+        try {
+            // Step 1: Check if account exists
+            Optional<Account> existingAccount = iAccountRepository.findByUsername(accountReqDTO.getUsername());
+            if (existingAccount.isPresent()) {
+                return "Account with username: " + accountReqDTO.getUsername() + " already exists";
+            }
+
+            // Step 2: Encrypt password
+            String encryptedPassword = passwordEncoder.encode(accountReqDTO.getPassword());
+
+            // Step 3: Create account
+            int accountCreated = iAccountRepository.createAccount(accountReqDTO.getUsername(), encryptedPassword);
+            if (accountCreated <= 0) {
+                throw new RuntimeException("Failed to create account");
+            }
+
+            // Step 4: Link account to InforUser (assuming you need to return ID from `createAccount`)
+            int linkAccount = iAccountRepository.linkAccountToInforUser();
+            if (linkAccount <= 0) {
+                throw new RuntimeException("Failed to link account to InforUser");
+            }
+
+            // Step 5: Create InforUser
+            int inforUserCreated = inforUserRepo.addNative(
+                    inforUserDto.getName(),
+                    inforUserDto.getEmail(),
+                    inforUserDto.getPhone(),
+                    inforUserDto.getAddress()
+            );
+            if (inforUserCreated <= 0) {
+                throw new RuntimeException("Failed to create InforUser information");
+            }
+
+            return "Account and customer information created successfully!";
+        } catch (Exception e) {
+            // Log lỗi để debug
+            e.printStackTrace();
+            // Rollback giao dịch và trả thông báo lỗi
+            throw new RuntimeException("Failed to create account and customer information: " + e.getMessage());
         }
     }
+
 
 
     @Override
