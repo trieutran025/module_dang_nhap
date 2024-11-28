@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/employees")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AdminController {
     @Autowired
     private InforUserRepoService inforUserRepoService;
 
-    @GetMapping("/employee/list")
+    @GetMapping("")
     public ResponseEntity<List<InforUserDto>> getAllInforUser() {
         return new ResponseEntity<>(inforUserRepoService.findAll(), HttpStatus.OK);
     }
