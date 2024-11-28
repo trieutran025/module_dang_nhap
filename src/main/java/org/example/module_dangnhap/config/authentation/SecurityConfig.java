@@ -29,11 +29,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import org.example.module_dangnhap.config.authentation.CorsConfig;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -47,8 +45,11 @@ public class SecurityConfig {
     JwtAuthenticationFilter jwtAuthenticationFilter;
 
     CustomLogoutHandler logoutHandler;
-    private static final String[] PUBLIC_ENDPOINTS = {"/login/**", "/home/**", "/customer/register","/change-password"};
-    private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employees/**",};
+    @Resource
+    CorsConfigurationSource corsConfigurationSource;
+
+    private static final String[] PUBLIC_ENDPOINTS = {"/login/**", "/home/**", "/register/**","/change-password"};
+    private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employees",};
     private static final String[] MANAGER_ENDPOINTS = {"/api/manager/update/**","/api/receptionist/**"};
     private static final String[] RECEPTIONIST_ENDPOINTS = {"/api/receptionist/update/**"};
     private static final String[] CUSTOMER_ENDPOINTS = {"/api/aaa/**"};
@@ -61,6 +62,7 @@ public class SecurityConfig {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cros->cros.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN")
@@ -101,22 +103,10 @@ public class SecurityConfig {
                 .build();
     }
 
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
         return configuration.getAuthenticationManager();
-    }
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Origin được phép
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // Phương thức HTTP được phép
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Header được phép
-        configuration.setExposedHeaders(List.of("Authorization")); // Header được hiển thị
-        configuration.setAllowCredentials(true); // Cho phép gửi cookie hoặc token
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Áp dụng cho tất cả endpoint
-        return source;
     }
 
 
