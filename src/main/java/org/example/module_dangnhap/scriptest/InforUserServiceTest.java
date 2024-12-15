@@ -1,25 +1,6 @@
 package org.example.module_dangnhap.scriptest;
 
-import org.example.module_dangnhap.dto.response.InforUserDto;
-import org.example.module_dangnhap.entity.Account;
-import org.example.module_dangnhap.entity.InforUser;
-import org.example.module_dangnhap.entity.Role;
-import org.example.module_dangnhap.repo.InforUserRepo;
-import org.example.module_dangnhap.service.Impl.InforUserService;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.modelmapper.ModelMapper;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 public class InforUserServiceTest {
 
@@ -66,7 +47,7 @@ public class InforUserServiceTest {
 //        List<InforUserDto> expectedDtos = List.of(userDto1, userDto2, userDto3);
 //
 //        // Giả lập phương thức findAllInforUser và ánh xạ model
-//        when(inforUserRepo.findAllEmployee(1L)).thenReturn(users);
+//        when(inforUserRepo.findAlReceptionist(1L)).thenReturn(users);
 //        when(modelMapper.map(user1, InforUserDto.class)).thenReturn(userDto1);
 //        when(modelMapper.map(user2, InforUserDto.class)).thenReturn(userDto2);
 //        when(modelMapper.map(user3, InforUserDto.class)).thenReturn(userDto3);

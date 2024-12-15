@@ -8,7 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.module_dangnhap.dto.request.AccountReqDTO;
 import org.example.module_dangnhap.dto.request.ChangePasswordRequest;
 import org.example.module_dangnhap.dto.response.ChangePasswordResponse;
-import org.example.module_dangnhap.dto.response.InforUserDto;
+import org.example.module_dangnhap.dto.request.InforUserDto;
+import org.example.module_dangnhap.dto.response.UserDtoResponse;
 import org.example.module_dangnhap.entity.Account;
 import org.example.module_dangnhap.entity.InforUser;
 import org.example.module_dangnhap.entity.Role;
@@ -16,10 +17,6 @@ import org.example.module_dangnhap.repo.IAccountRepository;
 import org.example.module_dangnhap.repo.InforUserRepo;
 import org.example.module_dangnhap.repo.RoleRepository;
 import org.example.module_dangnhap.service.Iteface.IAccountService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,12 +25,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -48,50 +41,112 @@ public class AccountServiceImpl implements IAccountService {
     RoleRepository roleRepository;
 
 
+
     @Transactional
-    public String createAccountAndCustomerInfo(AccountReqDTO accountReqDTO, InforUserDto inforUserDto) {
+    public String createAccountAndCustomerInfo(AccountReqDTO accountReqDTO, InforUserDto inforUserDto, String roleName) {
         try {
-            // Step 1: Check if account exists
+            // Bước 1: Kiểm tra tài khoản đã tồn tại
             Optional<Account> existingAccount = iAccountRepository.findByUsername(accountReqDTO.getUsername());
             if (existingAccount.isPresent()) {
-                return "Account with username: " + accountReqDTO.getUsername() + " already exists";
+                return "Tài khoản với tên người dùng: " + accountReqDTO.getUsername() + " đã tồn tại";
             }
 
-            // Step 2: Encrypt password
+            // Bước 2: Mã hóa mật khẩu
             String encryptedPassword = passwordEncoder.encode(accountReqDTO.getPassword());
 
-            // Step 3: Create account
-            int accountCreated = iAccountRepository.createAccount(accountReqDTO.getUsername(), encryptedPassword);
-            if (accountCreated <= 0) {
-                throw new RuntimeException("Failed to create account");
-            }
+            // Bước 3: Tạo tài khoản
+            iAccountRepository.createAccount(accountReqDTO.getUsername(), encryptedPassword);
 
-            // Step 4: Link account to InforUser (assuming you need to return ID from `createAccount`)
-            int linkAccount = iAccountRepository.linkAccountToInforUser();
-            if (linkAccount <= 0) {
-                throw new RuntimeException("Failed to link account to InforUser");
-            }
+            // Bước 4: Truy vấn tài khoản đã tạo
+            Account createdAccount = iAccountRepository.findByUsername(accountReqDTO.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Không thể tìm thấy tài khoản đã tạo"));
 
-            // Step 5: Create InforUser
+            // Bước 5: Tạo InforUser và liên kết với tài khoản
+            inforUserDto.setAccountId(createdAccount.getAccountId()); // Đảm bảo ID tài khoản được thiết lập
             int inforUserCreated = inforUserRepo.addNative(
+                    inforUserDto.getAccountId(),
                     inforUserDto.getName(),
                     inforUserDto.getEmail(),
                     inforUserDto.getPhone(),
                     inforUserDto.getAddress()
             );
             if (inforUserCreated <= 0) {
-                throw new RuntimeException("Failed to create InforUser information");
+                throw new RuntimeException("Không thể tạo thông tin InforUser");
             }
 
-            return "Account and customer information created successfully!";
+            // Bước 6: Tạo vai trò cho tài khoản (nếu chưa có vai trò)
+            Optional<Role> role = roleRepository.findByRoleName(roleName);
+            if (role.isPresent()) {
+                // Thêm vai trò vào tài khoản
+                roleRepository.assignRoleToAccount(createdAccount.getAccountId(), role.get().getRoleId());
+            } else {
+                throw new RuntimeException("Vai trò không tồn tại");
+            }
+
+            return "Tạo tài khoản, thông tin khách hàng và gán vai trò thành công!";
         } catch (Exception e) {
-            // Log lỗi để debug
+            // Ghi log lỗi để dễ dàng debug
             e.printStackTrace();
             // Rollback giao dịch và trả thông báo lỗi
-            throw new RuntimeException("Failed to create account and customer information: " + e.getMessage());
+            throw new RuntimeException("Không thể tạo tài khoản và thông tin khách hàng: " + e.getMessage());
         }
     }
+    @Transactional
+    public String updateAccountAndCustomerInfo(AccountReqDTO accountReqDTO, UserDtoResponse inforUserDto, String roleName) {
+        try {
+            // Bước 1: Lấy accountId từ infor_userId (ID của thông tin người dùng)
+            Optional<InforUser> inforUser = inforUserRepo.findById(inforUserDto.getId());
+            if (inforUser.isEmpty()) {
+                return "Không tìm thấy thông tin người dùng";
+            }
 
+            Long accountId = inforUser.get().getAccount().getAccountId(); // Lấy accountId từ thông tin người dùng
+
+            // Bước 2: Cập nhật tài khoản
+            Optional<Account> existingAccount = iAccountRepository.findById(accountId);
+            if (existingAccount.isEmpty()) {
+                return "Tài khoản không tồn tại";
+            }
+
+            // Kiểm tra mật khẩu và mã hóa nếu có sự thay đổi
+            String encryptedPassword = accountReqDTO.getPassword();
+            if (encryptedPassword != null && !encryptedPassword.isEmpty()) {
+                encryptedPassword = passwordEncoder.encode(encryptedPassword);  // Mã hóa mật khẩu
+            }
+
+            // Cập nhật tài khoản
+            iAccountRepository.updateAccount(accountId, accountReqDTO.getUsername(), encryptedPassword);
+
+            // Bước 3: Cập nhật thông tin người dùng (InforUser)
+            inforUserDto.setAccountId(accountId); // Đảm bảo accountId được thiết lập
+            int inforUserUpdated = inforUserRepo.updateNative(
+                    inforUserDto.getId(),
+                    inforUserDto.getName(),
+                    inforUserDto.getEmail(),
+                    inforUserDto.getPhone(),
+                    inforUserDto.getAddress()
+            );
+            if (inforUserUpdated <= 0) {
+                throw new RuntimeException("Không thể cập nhật thông tin người dùng");
+            }
+
+            // Bước 4: Cập nhật vai trò cho tài khoản
+            Optional<Role> role = roleRepository.findByRoleName(roleName);
+            if (role.isPresent()) {
+                int rowsAffected = roleRepository.updateRoleForAccount(accountId, role.get().getRoleId());
+                if (rowsAffected <= 0) {
+                    throw new RuntimeException("Không thể cập nhật vai trò cho tài khoản");
+                }
+            } else {
+                throw new RuntimeException("Vai trò không tồn tại");
+            }
+
+            return "Cập nhật tài khoản, thông tin người dùng và vai trò thành công!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Không thể cập nhật tài khoản và thông tin người dùng: " + e.getMessage());
+        }
+    }
 
 
     @Override

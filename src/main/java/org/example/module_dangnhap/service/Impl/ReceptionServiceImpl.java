@@ -7,8 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.module_dangnhap.dto.request.InforUserDto;
 import org.example.module_dangnhap.entity.InforUser;
 import org.example.module_dangnhap.repo.IAccountRepository;
-import org.example.module_dangnhap.repo.InforUserRepo;
-import org.example.module_dangnhap.service.Iteface.InforUserRepoService;
+import org.example.module_dangnhap.repo.ManagerRepo;
+import org.example.module_dangnhap.repo.ReceptionistRepo;
+import org.example.module_dangnhap.service.Iteface.ReceptionService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,16 +22,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class InforUserService implements InforUserRepoService {
-    @Autowired
-    InforUserRepo inforUserRepo;
+public class ReceptionServiceImpl implements ReceptionService {
     @Autowired
     IAccountRepository accountRepo;
     @Autowired
     ModelMapper modelMapper;
-
-
-
+    @Autowired
+    ReceptionistRepo receptionistRepo;
     @Override
     public Page<InforUserDto> findAll(Pageable pageable) {
         // Lấy account_id của người dùng hiện tại từ SecurityContextHolder
@@ -43,7 +41,7 @@ public class InforUserService implements InforUserRepoService {
         }
 
         // Gọi repository để lấy danh sách nhân viên, bỏ qua người dùng hiện tại và phân trang
-        Page<InforUser> inforUsersPage = inforUserRepo.findAllEmployee(currentAccountId, pageable);
+        Page<InforUser> inforUsersPage = receptionistRepo.findAllCustomer(currentAccountId, pageable);
 
         // Ánh xạ danh sách InforUser thành InforUserDto
         Page<InforUserDto> inforUserDtosPage = inforUsersPage.map(inforUser -> {
@@ -54,23 +52,5 @@ public class InforUserService implements InforUserRepoService {
         });
 
         return inforUserDtosPage;
-    }
-
-
-
-    @Override
-    public void delete(Long id) {
-        inforUserRepo.deleteByIdNative(id);
-    }
-
-
-    @Override
-    public void add(Long accountId,String name, String email, String phone,String address) {
-        inforUserRepo.addNative(accountId, name, email, phone,address);
-    }
-
-    @Override
-    public void update(Long id, String name, String email, String phone,String address) {
-        inforUserRepo.updateNative(id, name, email, phone, address);
     }
 }

@@ -10,8 +10,8 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateAccountRequest {
-    private AccountReqDTO accountReqDTO;
-    private InforUserDto inforUserDto;
+public class AccountUserDto {
+    AccountReqDTO accountReqDTO;
+    InforUserDto userDto;
     private String roleName;
 }

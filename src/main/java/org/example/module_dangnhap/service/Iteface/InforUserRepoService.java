@@ -1,14 +1,16 @@
 package org.example.module_dangnhap.service.Iteface;
 
-import org.example.module_dangnhap.dto.response.InforUserDto;
+import org.example.module_dangnhap.dto.request.InforUserDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 @Service
 public interface InforUserRepoService {
-    List<InforUserDto> findAll();
+     Page<InforUserDto> findAll(Pageable pageable);
     void delete(Long id);
-    void add(String name, String email, String phone,String address);
+    void add(Long accountId,String name, String email, String phone,String address);
 
-    void update(Long id, String name, String email, String phone);
+
+    void update(Long id, String name, String email, String phone, String address);
 }

@@ -48,11 +48,11 @@ public class SecurityConfig {
     @Resource
     CorsConfigurationSource corsConfigurationSource;
 
-    private static final String[] PUBLIC_ENDPOINTS = {"/login/**", "/home/**", "/register/**","/change-password"};
-    private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employees",};
-    private static final String[] MANAGER_ENDPOINTS = {"/api/manager/update/**","/api/receptionist/**"};
-    private static final String[] RECEPTIONIST_ENDPOINTS = {"/api/receptionist/update/**"};
-    private static final String[] CUSTOMER_ENDPOINTS = {"/api/aaa/**"};
+    private static final String[] PUBLIC_ENDPOINTS = {"/login/**", "/home/**", "/register/**","/change-password","/refresh_token"};
+    private static final String[] ADMIN_ENDPOINTS = {"/api/account/**","/api/employees/**",};
+    private static final String[] MANAGER_ENDPOINTS = {"/api/manager/{id}","/api/receptionist/**"};
+    private static final String[] RECEPTIONIST_ENDPOINTS = {"/api/receptionist/{id}","/api/customer/**"};
+    private static final String[] CUSTOMER_ENDPOINTS = {"/api/customer/{id}"};
 
 
 

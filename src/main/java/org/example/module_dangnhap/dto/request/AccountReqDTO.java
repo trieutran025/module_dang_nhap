@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AccountReqDTO {
+    Long AccountId;
 //    @NotBlank(message = "Username is mandatory")
 //    @Size(max = 30, message = "Username must not exceed 30 characters")
 //    @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "Username must contain only letters and numbers")

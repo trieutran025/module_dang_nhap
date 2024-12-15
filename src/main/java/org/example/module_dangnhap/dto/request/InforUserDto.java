@@ -1,4 +1,4 @@
-package org.example.module_dangnhap.dto.response;
+package org.example.module_dangnhap.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,4 +22,7 @@ public class InforUserDto {
      String address;
      Long accountId;
      Set<Role> roleName;
+
+    public InforUserDto(String name, String email, String phone, String address) {
+    }
 }

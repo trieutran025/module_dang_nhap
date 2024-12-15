@@ -16,4 +16,8 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
     @Transactional
     @Query(value = "INSERT INTO account_role (account_id, role_id) VALUES (:accountId, :roleId)", nativeQuery = true)
     int assignRoleToAccount(@Param("accountId") Long accountId, @Param("roleId") Long roleId);
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE account_role SET role_id = :roleId WHERE account_id = :accountId", nativeQuery = true)
+    int updateRoleForAccount(@Param("accountId") Long accountId, @Param("roleId") Long roleId);
 }
